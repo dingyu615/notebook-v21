@@ -1,36 +1,646 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f7f4">
-<title>我的错题本</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f7f4">
+<title>我的错题本 V2.2</title>
 <style>
-:root{--bg:#f7f7f4;--card:#fff;--ink:#20231f;--muted:#73786f;--line:#e7e8e1;--green:#416b53;--soft:#edf3ed;--red:#a34c43}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;padding:env(safe-area-inset-top) 15px calc(24px + env(safe-area-inset-bottom))}.wrap{max-width:720px;margin:auto}.head{display:flex;justify-content:space-between;align-items:center;padding:22px 2px 16px}.head h1{font-size:25px;margin:0 0 5px}.sub,.muted{color:var(--muted);font-size:13px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat,.panel,.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}.num{font-size:27px;font-weight:700}.label{font-size:12px;color:var(--muted)}.panel{margin-top:14px}.panel h2{font-size:17px;margin:0 0 12px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{border:0;border-radius:12px;padding:13px 12px;background:var(--soft);color:var(--green);font-weight:650;font-size:15px}.btn.primary{background:var(--green);color:white}.btn.ghost{background:#f1f1ed;color:#454a43}.btn.danger{background:#fbefed;color:var(--red)}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;background:white;color:var(--ink);margin:5px 0 12px}textarea{min-height:86px;resize:vertical}label{font-size:13px;color:var(--muted)}.row{display:flex;gap:8px}.row>*{flex:1}.item{margin-top:9px}.itemtop{display:flex;justify-content:space-between;gap:8px}.tag{font-size:11px;color:var(--green);background:var(--soft);border-radius:20px;padding:4px 8px;white-space:nowrap}.item h3{font-size:16px;margin:8px 0}.item p{font-size:14px;white-space:pre-wrap;margin:6px 0;color:#555}.empty{text-align:center;color:var(--muted);padding:25px 5px;font-size:14px}.hidden{display:none!important}.foot{font-size:12px;color:var(--muted);line-height:1.6;margin:18px 3px}.photo{max-width:100%;max-height:220px;display:block;border-radius:10px;margin-top:8px}.small{font-size:12px}.tabs{display:flex;gap:8px;margin:14px 0}.tabs button{flex:1}.filter{display:flex;gap:8px}.filter select{margin:0}
-@media print{body{background:white;padding:0}.no-print{display:none!important}.wrap{max-width:none}.item{break-inside:avoid;border:1px solid #bbb}.print-title{display:block!important} @page{size:B5;margin:12mm}}
-</style></head>
-<body><main class="wrap">
-<header class="head"><div><h1>我的错题本</h1><div class="sub">整理错题 · 定期复习 · 打印练习</div></div><div style="font-size:30px">📚</div></header>
-<section class="stats"><div class="stat"><div class="num" id="total">0</div><div class="label">错题总数</div></div><div class="stat"><div class="num" id="todo">0</div><div class="label">待复习</div></div><div class="stat"><div class="num" id="done">0</div><div class="label">已掌握</div></div></section>
-<section class="panel no-print"><h2>快速开始</h2><div class="actions"><button class="btn primary" id="newBtn">＋ 手动录入</button><label class="btn" for="camera" style="display:block;text-align:center;cursor:pointer">📷 拍照 / 选照片</label></div><input id="camera" type="file" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden"></section>
-<section class="panel hidden no-print" id="editor"><h2 id="formTitle">新增错题</h2><form id="entryForm"><label>题目名称 / 简短标题</label><input id="title" required placeholder="例如：分数加减法第 3 题"><div class="row"><div><label>学科</label><select id="subject"><option>数学</option><option>语文</option><option>英语</option><option>物理</option><option>化学</option><option>其他</option></select></div><div><label>知识点</label><input id="topic" placeholder="例如：通分"></div></div><label>题目内容</label><textarea id="question" placeholder="输入题目，或先上传题目照片"></textarea><label>正确答案 / 解题过程</label><textarea id="answer" placeholder="填写正确答案和关键步骤"></textarea><label>错误原因</label><textarea id="reason" placeholder="例如：约分时漏掉分子"></textarea><div class="row"><div><label>复习状态</label><select id="status"><option value="待复习">待复习</option><option value="复习中">复习中</option><option value="已掌握">已掌握</option></select></div><div><label>日期</label><input id="date" type="date"></div></div><div id="photoPreview"></div><div class="actions"><button class="btn primary" type="submit">保存错题</button><button class="btn ghost" type="button" id="cancelBtn">取消</button></div></form></section>
-<section class="panel"><div class="itemtop"><h2 style="margin:0">错题列表</h2><button class="btn ghost no-print" id="printBtn" style="padding:8px 12px">打印 B5</button></div><div class="tabs no-print"><div class="filter"><select id="subjectFilter"><option value="全部">全部学科</option><option>数学</option><option>语文</option><option>英语</option><option>物理</option><option>化学</option><option>其他</option></select><select id="statusFilter"><option value="全部">全部状态</option><option>待复习</option><option>复习中</option><option>已掌握</option></select></div></div><div id="list"><div class="empty">还没有错题，点击“手动录入”开始整理。</div></div></section>
-<section class="panel no-print"><h2>数据备份</h2><div class="actions"><button class="btn" id="exportBtn">导出备份</button><button class="btn" id="importBtn">导入备份</button></div><input id="backupFile" type="file" accept="application/json" class="hidden"><p class="foot">数据保存在当前浏览器本地。建议定期导出备份；清理 Safari 网站数据或更换设备可能导致数据丢失。</p></section>
-<p class="foot no-print">轻量基础版：支持手动整理、照片附加、本地保存、备份和 B5 打印。照片文字识别、公式识别及几何图形自动重绘尚未接入。</p>
+:root{
+  --bg:#f7f7f4;--card:#fff;--ink:#20231f;
+  --muted:#73786f;--line:#e7e8e1;
+  --green:#416b53;--soft:#edf3ed;--red:#a34c43
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:16px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+  padding:env(safe-area-inset-top) 15px calc(24px + env(safe-area-inset-bottom))
+}
+.wrap{max-width:720px;margin:auto}
+.head{display:flex;justify-content:space-between;align-items:center;padding:22px 2px 16px}
+.head h1{font-size:25px;margin:0 0 5px}
+.sub,.muted{color:var(--muted);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat,.panel,.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.num{font-size:27px;font-weight:700}
+.label{font-size:12px;color:var(--muted)}
+.panel{margin-top:14px}
+.panel h2{font-size:17px;margin:0 0 12px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.btn{
+  border:0;border-radius:12px;padding:13px 12px;
+  background:var(--soft);color:var(--green);
+  font-weight:650;font-size:15px
+}
+.btn.primary{background:var(--green);color:white}
+.btn.ghost{background:#f1f1ed;color:#454a43}
+.btn.danger{background:#fbefed;color:var(--red)}
+.btn:disabled{opacity:.5}
+input,textarea,select{
+  width:100%;border:1px solid var(--line);border-radius:11px;
+  padding:12px;font:inherit;background:white;color:var(--ink);margin:5px 0 12px
+}
+textarea{min-height:86px;resize:vertical}
+label{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
+.item{margin-top:9px}
+.itemtop{display:flex;justify-content:space-between;gap:8px}
+.tag{
+  font-size:11px;color:var(--green);background:var(--soft);
+  border-radius:20px;padding:4px 8px;white-space:nowrap
+}
+.item h3{font-size:16px;margin:8px 0}
+.item p{font-size:14px;white-space:pre-wrap;margin:6px 0;color:#555}
+.empty{text-align:center;color:var(--muted);padding:25px 5px;font-size:14px}
+.hidden{display:none!important}
+.foot{font-size:12px;color:var(--muted);line-height:1.6;margin:18px 3px}
+.photo{max-width:100%;max-height:220px;display:block;border-radius:10px;margin-top:8px}
+.small{font-size:12px}
+.filter{display:flex;gap:8px}
+.filter select{margin:0}
+.ocr-status{font-size:13px;color:var(--muted);line-height:1.6;margin:10px 0}
+@media print{
+  body{background:white;padding:0}
+  .no-print{display:none!important}
+  .wrap{max-width:none}
+  .item{break-inside:avoid;border:1px solid #bbb}
+  @page{size:B5;margin:12mm}
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<header class="head">
+  <div>
+    <h1>我的错题本</h1>
+    <div class="sub">整理错题 · 定期复习 · 打印练习</div>
+  </div>
+  <div style="font-size:30px">📚</div>
+</header>
+
+<section class="stats">
+  <div class="stat">
+    <div class="num" id="total">0</div>
+    <div class="label">错题总数</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="todo">0</div>
+    <div class="label">待复习</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="done">0</div>
+    <div class="label">已掌握</div>
+  </div>
+</section>
+
+<section class="panel no-print">
+  <h2>快速开始</h2>
+  <div class="actions">
+    <button class="btn primary" id="newBtn">＋ 手动录入</button>
+    <label class="btn" for="camera" style="display:block;text-align:center;cursor:pointer">
+      📷 拍照 / 选照片
+    </label>
+  </div>
+  <input id="camera" type="file" accept="image/*"
+    style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+</section>
+
+<section class="panel hidden no-print" id="editor">
+  <h2 id="formTitle">新增错题</h2>
+
+  <form id="entryForm">
+
+    <label>题目名称 / 简短标题</label>
+    <input id="title" required placeholder="例如：分数加减法第 3 题">
+
+    <div class="row">
+      <div>
+        <label>学科</label>
+        <select id="subject">
+          <option>数学</option>
+          <option>语文</option>
+          <option>英语</option>
+          <option>物理</option>
+          <option>化学</option>
+          <option>其他</option>
+        </select>
+      </div>
+      <div>
+        <label>知识点</label>
+        <input id="topic" placeholder="例如：通分">
+      </div>
+    </div>
+
+    <label>题目内容</label>
+    <textarea id="question" placeholder="识别结果会填入这里，也可以手动修改"></textarea>
+
+    <label>正确答案 / 解题过程</label>
+    <textarea id="answer" placeholder="填写正确答案和关键步骤"></textarea>
+
+    <label>错误原因</label>
+    <textarea id="reason" placeholder="例如：约分时漏掉分子"></textarea>
+
+    <div class="row">
+      <div>
+        <label>复习状态</label>
+        <select id="status">
+          <option value="待复习">待复习</option>
+          <option value="复习中">复习中</option>
+          <option value="已掌握">已掌握</option>
+        </select>
+      </div>
+      <div>
+        <label>日期</label>
+        <input id="date" type="date">
+      </div>
+    </div>
+
+    <div id="photoPreview"></div>
+
+    <div class="actions no-print" style="margin-top:10px">
+      <button class="btn" type="button" id="ocrBtn">识别照片文字</button>
+      <button class="btn ghost" type="button" id="cancelBtn">取消</button>
+    </div>
+
+    <div id="ocrStatus" class="ocr-status" aria-live="polite"></div>
+
+    <button class="btn primary" type="submit" style="width:100%">
+      保存错题
+    </button>
+
+  </form>
+</section>
+
+<section class="panel">
+  <div class="itemtop">
+    <h2 style="margin:0">错题列表</h2>
+    <button class="btn ghost no-print" id="printBtn" style="padding:8px 12px">
+      打印 B5
+    </button>
+  </div>
+
+  <div class="no-print" style="margin:14px 0">
+    <div class="filter">
+      <select id="subjectFilter">
+        <option value="全部">全部学科</option>
+        <option>数学</option>
+        <option>语文</option>
+        <option>英语</option>
+        <option>物理</option>
+        <option>化学</option>
+        <option>其他</option>
+      </select>
+
+      <select id="statusFilter">
+        <option value="全部">全部状态</option>
+        <option>待复习</option>
+        <option>复习中</option>
+        <option>已掌握</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="list">
+    <div class="empty">还没有错题，点击“手动录入”开始整理。</div>
+  </div>
+</section>
+
+<section class="panel no-print">
+  <h2>数据备份</h2>
+  <div class="actions">
+    <button class="btn" id="exportBtn">导出备份</button>
+    <button class="btn" id="importBtn">导入备份</button>
+  </div>
+  <input id="backupFile" type="file" accept="application/json" class="hidden">
+  <p class="foot">
+    数据保存在当前浏览器本地。建议定期导出备份；
+    清理 Safari 网站数据或更换设备可能导致数据丢失。
+  </p>
+</section>
+
+<p class="foot no-print">
+  V2.2：支持手动整理、照片附加、中文英文文字识别、本地保存、备份和 B5 打印。
+  数学公式识别和几何图形自动重绘尚未接入。
+</p>
+
 </main>
+
 <script>
-const DB='wrong-notebook-lite-v1';let records=[],editing=null,pendingPhoto=null;
-const $=id=>document.getElementById(id);
-function load(){try{records=JSON.parse(localStorage.getItem(DB)||'[]')}catch(e){records=[]}render()}
-function save(){try{localStorage.setItem(DB,JSON.stringify(records));return true}catch(e){alert('保存空间不足。请先导出备份，或减少照片数量。');return false}}
-function openForm(r=null){editing=r?.id||null;$('editor').classList.remove('hidden');$('formTitle').textContent=r?'编辑错题':'新增错题';$('title').value=r?.title||'';$('subject').value=r?.subject||'数学';$('topic').value=r?.topic||'';$('question').value=r?.question||'';$('answer').value=r?.answer||'';$('reason').value=r?.reason||'';$('status').value=r?.status||'待复习';$('date').value=r?.date||new Date().toISOString().slice(0,10);pendingPhoto=r?.photo||null;showPhoto();$('editor').scrollIntoView({behavior:'smooth',block:'start'})}
-function showPhoto(){ $('photoPreview').innerHTML=pendingPhoto?'<div class="small muted">已附加题目照片</div><img class="photo" src="'+pendingPhoto+'"><button type="button" class="btn danger" id="removePhoto" style="margin-top:7px">移除照片</button>':'';let b=$('removePhoto');if(b)b.onclick=()=>{pendingPhoto=null;showPhoto()}}
-$('newBtn').onclick=()=>openForm();$('cancelBtn').onclick=()=>$('editor').classList.add('hidden');
-$('camera').onchange=e=>{let f=e.target.files[0];if(!f)return;if(f.size>3*1024*1024){alert('照片请控制在 3MB 以内，以免占用过多手机空间。');e.target.value='';return}let rd=new FileReader();rd.onload=()=>{openForm();pendingPhoto=rd.result;showPhoto()};rd.readAsDataURL(f)};
-$('entryForm').onsubmit=e=>{e.preventDefault();let r={id:editing||String(Date.now()),title:$('title').value.trim(),subject:$('subject').value,topic:$('topic').value.trim(),question:$('question').value,answer:$('answer').value,reason:$('reason').value,status:$('status').value,date:$('date').value,photo:pendingPhoto};if(editing)records=records.map(x=>x.id===editing?r:x);else records.unshift(r);if(save()){$('editor').classList.add('hidden');render()}};
-function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function render(){ $('total').textContent=records.length;$('todo').textContent=records.filter(x=>x.status!=='已掌握').length;$('done').textContent=records.filter(x=>x.status==='已掌握').length;let a=records.filter(x=>($('subjectFilter').value==='全部'||x.subject===$('subjectFilter').value)&&($('statusFilter').value==='全部'||x.status===$('statusFilter').value));$('list').innerHTML=a.length?a.map(r=>`<article class="item"><div class="itemtop"><span class="tag">${esc(r.subject)} · ${esc(r.status)}</span><span class="muted small">${esc(r.date||'')}</span></div><h3>${esc(r.title)}</h3>${r.topic?`<p>知识点：${esc(r.topic)}</p>`:''}${r.question?`<p><b>题目：</b>${esc(r.question)}</p>`:''}${r.answer?`<p><b>答案：</b>${esc(r.answer)}</p>`:''}${r.reason?`<p><b>错误原因：</b>${esc(r.reason)}</p>`:''}${r.photo?`<img class="photo" src="${r.photo}">`:''}<div class="actions no-print" style="margin-top:10px"><button class="btn" onclick="editRecord('${r.id}')">编辑</button><button class="btn danger" onclick="deleteRecord('${r.id}')">删除</button></div></article>`).join(''):'<div class="empty">没有符合条件的错题。</div>'}
-window.editRecord=id=>openForm(records.find(x=>x.id===id));window.deleteRecord=id=>{if(confirm('确定删除这道错题吗？')){records=records.filter(x=>x.id!==id);save();render()}};
-$('subjectFilter').onchange=render;$('statusFilter').onchange=render;$('printBtn').onclick=()=>window.print();
-$('exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify({app:'错题本轻量版',version:1,records},null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='错题本备份.json';a.click();URL.revokeObjectURL(a.href)};
-$('importBtn').onclick=()=>$('backupFile').click();$('backupFile').onchange=e=>{let f=e.target.files[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let d=JSON.parse(rd.result),arr=Array.isArray(d)?d:d.records;if(!Array.isArray(arr))throw Error();if(confirm('导入将替换当前错题数据，是否继续？')){records=arr;save();render();alert('导入成功')}}catch(err){alert('文件格式不正确，无法导入')}};rd.readAsText(f);e.target.value=''};
+/* ===============================
+   1. 数据存储
+================================ */
+const DB = 'wrong-notebook-lite-v1';
+
+let records = [];
+let editing = null;
+let pendingPhoto = null;
+let ocrWorker = null;
+let ocrLoading = false;
+
+const $ = id => document.getElementById(id);
+
+function load(){
+  try{
+    records = JSON.parse(localStorage.getItem(DB) || '[]');
+  }catch(e){
+    records = [];
+  }
+  render();
+}
+
+function save(){
+  try{
+    localStorage.setItem(DB, JSON.stringify(records));
+    return true;
+  }catch(e){
+    alert('保存空间不足。请先导出备份，或减少照片数量。');
+    return false;
+  }
+}
+
+/* ===============================
+   2. 录入表单
+================================ */
+function openForm(r = null){
+  editing = r?.id || null;
+
+  $('editor').classList.remove('hidden');
+  $('formTitle').textContent = r ? '编辑错题' : '新增错题';
+
+  $('title').value = r?.title || '';
+  $('subject').value = r?.subject || '数学';
+  $('topic').value = r?.topic || '';
+  $('question').value = r?.question || '';
+  $('answer').value = r?.answer || '';
+  $('reason').value = r?.reason || '';
+  $('status').value = r?.status || '待复习';
+  $('date').value = r?.date || new Date().toISOString().slice(0,10);
+
+  pendingPhoto = r?.photo || null;
+
+  $('ocrStatus').textContent = '';
+  showPhoto();
+
+  $('editor').scrollIntoView({
+    behavior:'smooth',
+    block:'start'
+  });
+}
+
+function showPhoto(){
+  $('photoPreview').innerHTML = pendingPhoto
+    ? '<div class="small muted">已附加题目照片</div>' +
+      '<img class="photo" src="' + pendingPhoto + '">' +
+      '<button type="button" class="btn danger" id="removePhoto" style="margin-top:7px">移除照片</button>'
+    : '';
+
+  const b = $('removePhoto');
+
+  if(b){
+    b.onclick = () => {
+      pendingPhoto = null;
+      showPhoto();
+    };
+  }
+}
+
+$('newBtn').onclick = () => openForm();
+
+$('cancelBtn').onclick = () => {
+  $('editor').classList.add('hidden');
+};
+
+/* ===============================
+   3. 拍照和选择照片
+================================ */
+$('camera').onchange = e => {
+  const f = e.target.files[0];
+  if(!f) return;
+
+  if(f.size > 3 * 1024 * 1024){
+    alert('照片请控制在 3MB 以内，以免占用过多手机空间。');
+    e.target.value = '';
+    return;
+  }
+
+  const rd = new FileReader();
+
+  rd.onload = () => {
+    openForm();
+    pendingPhoto = rd.result;
+    showPhoto();
+  };
+
+  rd.readAsDataURL(f);
+  e.target.value = '';
+};
+
+/* ===============================
+   4. OCR 文字识别
+   按需加载，不打开页面就下载模型
+================================ */
+function loadOcrLibrary(){
+  return new Promise((resolve,reject) => {
+    if(window.Tesseract){
+      resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('OCR组件加载失败，请检查网络连接。'));
+
+    document.head.appendChild(script);
+  });
+}
+
+$('ocrBtn').onclick = async () => {
+
+  if(!pendingPhoto){
+    alert('请先拍摄或选择题目照片。');
+    return;
+  }
+
+  const btn = $('ocrBtn');
+
+  if(ocrLoading) return;
+
+  ocrLoading = true;
+  btn.disabled = true;
+
+  $('ocrStatus').textContent =
+    '正在准备文字识别功能，请保持页面打开。首次使用需要联网下载中文模型。';
+
+  try{
+
+    await loadOcrLibrary();
+
+    if(!ocrWorker){
+
+      ocrWorker = await Tesseract.createWorker(
+        'chi_sim+eng',
+        1,
+        {
+          logger: m => {
+
+            if(m.status === 'loading language traineddata'){
+              $('ocrStatus').textContent = '正在下载中文识别模型…';
+            }
+
+            if(m.status === 'recognizing text'){
+              const p = Math.round((m.progress || 0) * 100);
+              $('ocrStatus').textContent = '正在识别照片文字… ' + p + '%';
+            }
+          }
+        }
+      );
+    }
+
+    const result = await ocrWorker.recognize(pendingPhoto);
+
+    const text = (result.data.text || '').trim();
+
+    if(!text){
+      $('ocrStatus').textContent =
+        '没有识别到文字。请换一张清晰、正对题目的照片再试。';
+    }else{
+
+      const oldText = $('question').value.trim();
+
+      $('question').value = oldText
+        ? oldText + '\n' + text
+        : text;
+
+      $('ocrStatus').textContent =
+        '识别完成！请检查识别结果，尤其注意数字、运算符号和数学公式。';
+    }
+
+  }catch(err){
+
+    $('ocrStatus').textContent =
+      '识别失败：' + (err.message || '未知错误') +
+      '。请检查网络，刷新页面后重试。';
+
+  }finally{
+
+    btn.disabled = false;
+    ocrLoading = false;
+
+  }
+};
+
+/* ===============================
+   5. 保存错题
+================================ */
+$('entryForm').onsubmit = e => {
+  e.preventDefault();
+
+  const r = {
+    id: editing || String(Date.now()),
+    title: $('title').value.trim(),
+    subject: $('subject').value,
+    topic: $('topic').value.trim(),
+    question: $('question').value,
+    answer: $('answer').value,
+    reason: $('reason').value,
+    status: $('status').value,
+    date: $('date').value,
+    photo: pendingPhoto
+  };
+
+  if(editing){
+    records = records.map(x => x.id === editing ? r : x);
+  }else{
+    records.unshift(r);
+  }
+
+  if(save()){
+    $('editor').classList.add('hidden');
+    render();
+  }
+};
+
+/* ===============================
+   6. 安全显示文字
+================================ */
+function esc(s = ''){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+/* ===============================
+   7. 错题列表
+================================ */
+function render(){
+
+  $('total').textContent = records.length;
+
+  $('todo').textContent =
+    records.filter(x => x.status !== '已掌握').length;
+
+  $('done').textContent =
+    records.filter(x => x.status === '已掌握').length;
+
+  const a = records.filter(x =>
+    ($('subjectFilter').value === '全部' ||
+      x.subject === $('subjectFilter').value) &&
+    ($('statusFilter').value === '全部' ||
+      x.status === $('statusFilter').value)
+  );
+
+  $('list').innerHTML = a.length
+    ? a.map(r => `
+      <article class="item">
+
+        <div class="itemtop">
+          <span class="tag">
+            ${esc(r.subject)} · ${esc(r.status)}
+          </span>
+          <span class="muted small">
+            ${esc(r.date || '')}
+          </span>
+        </div>
+
+        <h3>${esc(r.title)}</h3>
+
+        ${r.topic
+          ? `<p>知识点：${esc(r.topic)}</p>`
+          : ''}
+
+        ${r.question
+          ? `<p><b>题目：</b>${esc(r.question)}</p>`
+          : ''}
+
+        ${r.answer
+          ? `<p><b>答案：</b>${esc(r.answer)}</p>`
+          : ''}
+
+        ${r.reason
+          ? `<p><b>错误原因：</b>${esc(r.reason)}</p>`
+          : ''}
+
+        ${r.photo
+          ? `<img class="photo" src="${r.photo}">`
+          : ''}
+
+        <div class="actions no-print" style="margin-top:10px">
+          <button class="btn" onclick="editRecord('${r.id}')">
+            编辑
+          </button>
+          <button class="btn danger" onclick="deleteRecord('${r.id}')">
+            删除
+          </button>
+        </div>
+
+      </article>
+    `).join('')
+    : '<div class="empty">没有符合条件的错题。</div>';
+}
+
+window.editRecord = id => {
+  openForm(records.find(x => x.id === id));
+};
+
+window.deleteRecord = id => {
+  if(confirm('确定删除这道错题吗？')){
+    records = records.filter(x => x.id !== id);
+    save();
+    render();
+  }
+};
+
+$('subjectFilter').onchange = render;
+$('statusFilter').onchange = render;
+
+/* ===============================
+   8. B5 打印
+================================ */
+$('printBtn').onclick = () => window.print();
+
+/* ===============================
+   9. 导出备份
+================================ */
+$('exportBtn').onclick = () => {
+
+  const blob = new Blob([
+    JSON.stringify({
+      app:'错题本轻量版',
+      version:2,
+      records
+    }, null, 2)
+  ], {
+    type:'application/json'
+  });
+
+  const a = document.createElement('a');
+
+  a.href = URL.createObjectURL(blob);
+  a.download = '错题本备份.json';
+  a.click();
+
+  URL.revokeObjectURL(a.href);
+};
+
+/* ===============================
+   10. 导入备份
+================================ */
+$('importBtn').onclick = () => {
+  $('backupFile').click();
+};
+
+$('backupFile').onchange = e => {
+
+  const f = e.target.files[0];
+  if(!f) return;
+
+  const rd = new FileReader();
+
+  rd.onload = () => {
+
+    try{
+
+      const d = JSON.parse(rd.result);
+      const arr = Array.isArray(d) ? d : d.records;
+
+      if(!Array.isArray(arr)) throw Error();
+
+      if(confirm('导入将替换当前错题数据，是否继续？')){
+
+        records = arr;
+
+        if(save()){
+          render();
+          alert('导入成功');
+        }
+      }
+
+    }catch(err){
+
+      alert('文件格式不正确，无法导入');
+
+    }
+  };
+
+  rd.readAsText(f);
+  e.target.value = '';
+};
+
+/* ===============================
+   11. 启动
+================================ */
 load();
-</script></body></html>
+
+</script>
+</body>
+</html>
